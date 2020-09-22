@@ -146,7 +146,8 @@ class Auth {
 					'code'       => 'jwt_auth_bad_config',
 					'message'    => __( 'JWT is not configurated properly.', 'jwt-auth' ),
 					'data'       => array(),
-				)
+				),
+				403
 			);
 		}
 
@@ -163,7 +164,8 @@ class Auth {
 					'code'       => $error_code,
 					'message'    => strip_tags( $user->get_error_message( $error_code ) ),
 					'data'       => array(),
-				)
+				),
+				403
 			);
 		}
 
@@ -294,7 +296,8 @@ class Auth {
 					'code'       => 'jwt_auth_no_auth_header',
 					'message'    => $this->messages['jwt_auth_no_auth_header'],
 					'data'       => array(),
-				)
+				),
+				403
 			);
 		}
 
@@ -312,7 +315,8 @@ class Auth {
 					'code'       => 'jwt_auth_bad_auth_header',
 					'message'    => $this->messages['jwt_auth_bad_auth_header'],
 					'data'       => array(),
-				)
+				),
+				403
 			);
 		}
 
@@ -327,7 +331,8 @@ class Auth {
 					'code'       => 'jwt_auth_bad_config',
 					'message'    => __( 'JWT is not configurated properly.', 'jwt-auth' ),
 					'data'       => array(),
-				)
+				),
+				403
 			);
 		}
 
@@ -346,7 +351,8 @@ class Auth {
 						'code'       => 'jwt_auth_bad_iss',
 						'message'    => __( 'The iss do not match with this server.', 'jwt-auth' ),
 						'data'       => array(),
-					)
+					),
+					403
 				);
 			}
 
@@ -360,7 +366,8 @@ class Auth {
 						'code'       => 'jwt_auth_bad_request',
 						'message'    => __( 'User ID not found in the token.', 'jwt-auth' ),
 						'data'       => array(),
-					)
+					),
+					403
 				);
 			}
 
@@ -376,7 +383,25 @@ class Auth {
 						'code'       => 'jwt_auth_user_not_found',
 						'message'    => __( "User doesn't exist", 'jwt-auth' ),
 						'data'       => array(),
-					)
+					),
+					403
+				);
+			}
+
+			// Check extra condition if exists.
+			$failed_msg = apply_filters( 'jwt_auth_extra_token_check', '', $user, $token, $payload );
+
+			if ( ! empty( $failed_msg ) ) {
+				// No user id in the token, abort!!
+				return new WP_REST_Response(
+					array(
+						'success'    => false,
+						'statusCode' => 403,
+						'code'       => 'jwt_auth_obsolete_token',
+						'message'    => __( 'Token is obsolete', 'jwt-auth' ),
+						'data'       => array(),
+					),
+					403
 				);
 			}
 
@@ -406,7 +431,8 @@ class Auth {
 					'code'       => 'jwt_auth_invalid_token',
 					'message'    => $e->getMessage(),
 					'data'       => array(),
-				)
+				),
+				403
 			);
 		}
 	}
